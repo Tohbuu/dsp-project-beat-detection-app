@@ -460,14 +460,6 @@ If you encounter issues:
 
 ---
 
-
-
-# 📚 DSP Project Documentation Template
-
-Here's a comprehensive documentation template for your DSP Beat Detection project:
-
----
-
 # 🎵 DSP Beat Detection & Tempo Estimation Project Documentation
 
 ## 📋 Project Overview
@@ -867,18 +859,3 @@ This project demonstrates practical application of Digital Signal Processing con
 
 ---
 
-## 🔗 Appendix
-
-### A. Code Repository Structure
-[Include your project file structure]
-
-### B. Installation and Setup Guide
-[Include your running instructions]
-
-### C. User Manual
-[Include GUI usage instructions]
-
-### D. Test Results Database
-[Include comprehensive performance data]
-
----
