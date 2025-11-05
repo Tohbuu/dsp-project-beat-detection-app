@@ -18,7 +18,7 @@
 
 ## 🎯 Project Overview
 
-A professional-grade Digital Signal Processing system that implements real-time beat detection and tempo estimation using multiple DSP algorithms. The system can analyze audio files and live audio input to detect beats, estimate tempo, and provide comprehensive visual feedback.
+A Digital Signal Processing system that implements realtime beat detection and tempo estimation using multiple DSP algorithms. The system can analyze audio files and live audio input to detect beats, estimate tempo, and provide comprehensive visual feedback.
 
 **Key Features:**
 - Multi-algorithm beat detection (Energy-based & Spectral Flux)
@@ -42,7 +42,7 @@ A professional-grade Digital Signal Processing system that implements real-time 
 - **OS**: Linux (Arch/Ubuntu), Windows 10+, or macOS
 - **Python**: 3.8 or higher
 - **Dependencies**: See `requirements.txt`
-
+Please refer to the documents section
 ---
 
 ## ⚡ Initial Setup
