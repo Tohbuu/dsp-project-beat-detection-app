@@ -127,10 +127,10 @@ class RealTimeBeatDetector:
             self.stream.close()
         print(f"\nStopped. Total beats detected: {self.beat_count}")
 
-def simple_real_time_detection():
+def simple_real_time_detection(stop_flag=None):
     """Simplified real-time detection without plots"""
     print("Starting simple real-time beat detection...")
-    print("Press Ctrl+C to stop")
+    print("Press 'Stop Real-time' in GUI to stop")
     
     energy_history = []
     beat_count = 0
@@ -140,6 +140,10 @@ def simple_real_time_detection():
         nonlocal beat_count
         if status:
             print(status)
+        
+        # Check if we should stop
+        if stop_flag and stop_flag():
+            raise sd.CallbackStop()
         
         audio = indata[:, 0]
         energy = np.sum(audio ** 2)
@@ -161,9 +165,18 @@ def simple_real_time_detection():
     try:
         with sd.InputStream(callback=audio_callback, channels=1, samplerate=22050, blocksize=1024):
             while True:
+                # Check stop flag periodically
+                if stop_flag and stop_flag():
+                    break
                 time.sleep(0.1)
+    except sd.CallbackStop:
+        print("Real-time detection stopped via callback")
     except KeyboardInterrupt:
-        print(f"\nStopped. Total beats detected: {beat_count}")
+        print("\nReal-time detection interrupted")
+    except Exception as e:
+        print(f"Real-time detection error: {e}")
+    finally:
+        print(f"Stopped. Total beats detected: {beat_count}")
 
 def main():
     import argparse

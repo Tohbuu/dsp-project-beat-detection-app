@@ -648,98 +648,82 @@ class BeatDetector:
     def visualize_enhanced_results(self, audio, sr, energy, spectral_flux,
                                   energy_beat_times, downbeat_times,
                                   tempo_over_time, tempo_times, 
-                                  flux_beat_times=None):
-        """Enhanced visualization with all new features"""
-        print("Generating enhanced visualization...")
-        
-        # Create a more comprehensive figure
-        fig, axes = plt.subplots(5, 1, figsize=(15, 12))
-        
+                                  flux_beat_times=None, fig=None):
+        """Enhanced visualization with improved readability and layout"""
+        import matplotlib.pyplot as plt
+        if fig is None:
+            fig = plt.figure(figsize=(16, 14))
+        axes = fig.subplots(5, 1, gridspec_kw={'hspace': 0.5})
+        fig.suptitle("DSP Beat Detection & Tempo Analysis", fontsize=18, fontweight='bold', color='#1565C0')
+
         time_axis_audio = np.arange(len(audio)) / sr
         time_axis_features = np.arange(len(energy)) * self.hop_size / sr
-        
+
         # Plot 1: Original audio with all beat types
-        axes[0].plot(time_axis_audio, audio, alpha=0.7, linewidth=0.8)
-        
-        # Plot different beat types with different colors and markers
-        if len(energy_beat_times) > 0:
-            # Regular beats (smaller, lighter)
-            beat_indices = [np.argmin(np.abs(time_axis_features - t)) for t in energy_beat_times]
-            beat_amplitudes = [energy[i] for i in beat_indices]
-            axes[0].scatter(energy_beat_times, [0] * len(energy_beat_times), 
-                           color='red', marker='o', s=20, alpha=0.6, label='Beats')
-        
-        if len(downbeat_times) > 0:
-            # Downbeats (larger, darker)
-            downbeat_indices = [np.argmin(np.abs(time_axis_features - t)) for t in downbeat_times]
-            downbeat_amplitudes = [energy[i] for i in downbeat_indices]
-            axes[0].scatter(downbeat_times, [0] * len(downbeat_times), 
-                           color='darkred', marker='o', s=80, alpha=0.9, label='Downbeats')
-        
-        axes[0].set_title('Audio Signal with Beat Detection (Red=Beats, Dark Red=Downbeats)')
-        axes[0].set_xlabel('Time (s)')
-        axes[0].set_ylabel('Amplitude')
-        axes[0].legend()
+        axes[0].plot(time_axis_audio, audio, alpha=0.8, linewidth=1.2, color='#37474F')
+        axes[0].set_title('Audio Signal', fontsize=14, fontweight='bold')
+        axes[0].set_xlabel('Time (s)', fontsize=12)
+        axes[0].set_ylabel('Amplitude', fontsize=12)
         axes[0].grid(True, alpha=0.3)
-        
+
+        # Regular beats
+        if len(energy_beat_times) > 0:
+            axes[0].scatter(energy_beat_times, [0] * len(energy_beat_times), 
+                            color='#FF5252', marker='o', s=30, alpha=0.7, label='Beats')
+        # Downbeats
+        if len(downbeat_times) > 0:
+            axes[0].scatter(downbeat_times, [0] * len(downbeat_times), 
+                            color='#B71C1C', marker='o', s=100, alpha=0.9, label='Downbeats')
+        axes[0].legend(fontsize=11, loc='upper right')
+
         # Plot 2: Energy envelope with dynamic threshold
-        axes[1].plot(time_axis_features, energy, 'b-', linewidth=1, label='Energy')
-        
-        # Calculate and plot dynamic threshold
+        axes[1].plot(time_axis_features, energy, color='#1976D2', linewidth=1.5, label='Energy')
         dynamic_thresh = self.dynamic_threshold(energy)
-        axes[1].plot(time_axis_features, dynamic_thresh, 'r--', linewidth=1, label='Dynamic Threshold')
-        
-        # Mark beats on energy plot
+        axes[1].plot(time_axis_features, dynamic_thresh, 'r--', linewidth=1.2, label='Dynamic Threshold')
         if len(energy_beat_times) > 0:
             beat_indices = [np.argmin(np.abs(time_axis_features - t)) for t in energy_beat_times]
             beat_energies = [energy[i] for i in beat_indices]
-            axes[1].scatter(energy_beat_times, beat_energies, color='red', s=30, alpha=0.8)
-        
-        axes[1].set_title('Energy Envelope with Dynamic Thresholding')
-        axes[1].set_xlabel('Time (s)')
-        axes[1].set_ylabel('Energy')
-        axes[1].legend()
+            axes[1].scatter(energy_beat_times, beat_energies, color='#FF5252', s=40, alpha=0.8)
+        axes[1].set_title('Energy Envelope & Dynamic Threshold', fontsize=14, fontweight='bold')
+        axes[1].set_xlabel('Time (s)', fontsize=12)
+        axes[1].set_ylabel('Energy', fontsize=12)
+        axes[1].legend(fontsize=11)
         axes[1].grid(True, alpha=0.3)
-        
+
         # Plot 3: Spectral flux
-        axes[2].plot(time_axis_features, spectral_flux, 'orange', linewidth=1, label='Spectral Flux')
-        
-        # Mark spectral flux beats if available
+        axes[2].plot(time_axis_features, spectral_flux, color='#FFA000', linewidth=1.5, label='Spectral Flux')
         if flux_beat_times is not None and len(flux_beat_times) > 0:
             flux_beat_indices = [np.argmin(np.abs(time_axis_features - t)) for t in flux_beat_times]
             flux_beat_values = [spectral_flux[i] for i in flux_beat_indices]
-            axes[2].scatter(flux_beat_times, flux_beat_values, color='purple', s=30, alpha=0.8, label='Flux Beats')
-        
-        axes[2].set_title('Spectral Flux')
-        axes[2].set_xlabel('Time (s)')
-        axes[2].set_ylabel('Spectral Flux')
-        axes[2].legend()
+            axes[2].scatter(flux_beat_times, flux_beat_values, color='#7B1FA2', s=40, alpha=0.8, label='Flux Beats')
+        axes[2].set_title('Spectral Flux', fontsize=14, fontweight='bold')
+        axes[2].set_xlabel('Time (s)', fontsize=12)
+        axes[2].set_ylabel('Spectral Flux', fontsize=12)
+        axes[2].legend(fontsize=11)
         axes[2].grid(True, alpha=0.3)
-        
-        # Plot 4: Tempo over time (if we have tempo analysis)
+
+        # Plot 4: Tempo over time
         if tempo_over_time and len(tempo_over_time) > 0:
-            axes[3].plot(tempo_times, tempo_over_time, 'g-', linewidth=2, label='Tempo')
-            axes[3].axhline(y=np.mean(tempo_over_time), color='r', linestyle='--', 
-                           label=f'Average: {np.mean(tempo_over_time):.1f} BPM')
-            axes[3].set_title('Tempo Analysis Over Time')
-            axes[3].set_xlabel('Time (s)')
-            axes[3].set_ylabel('Tempo (BPM)')
+            axes[3].plot(tempo_times, tempo_over_time, color='#388E3C', linewidth=2, label='Tempo')
+            axes[3].axhline(y=np.mean(tempo_over_time), color='#D32F2F', linestyle='--', 
+                            label=f'Avg: {np.mean(tempo_over_time):.1f} BPM')
+            axes[3].set_title('Tempo Analysis Over Time', fontsize=14, fontweight='bold')
+            axes[3].set_xlabel('Time (s)', fontsize=12)
+            axes[3].set_ylabel('Tempo (BPM)', fontsize=12)
             axes[3].set_ylim(max(60, np.min(tempo_over_time)-10), np.max(tempo_over_time)+10)
-            axes[3].legend()
+            axes[3].legend(fontsize=11)
             axes[3].grid(True, alpha=0.3)
         else:
             axes[3].text(0.5, 0.5, 'Insufficient data for tempo analysis over time', 
-                        ha='center', va='center', transform=axes[3].transAxes)
-            axes[3].set_title('Tempo Analysis Over Time')
-            axes[3].set_xlabel('Time (s)')
-            axes[3].set_ylabel('Tempo (BPM)')
-        
+                         ha='center', va='center', transform=axes[3].transAxes, fontsize=12)
+            axes[3].set_title('Tempo Analysis Over Time', fontsize=14, fontweight='bold')
+            axes[3].set_xlabel('Time (s)', fontsize=12)
+            axes[3].set_ylabel('Tempo (BPM)', fontsize=12)
+
         # Plot 5: Beat intervals and downbeat pattern
         if len(energy_beat_times) > 1:
             intervals = np.diff(energy_beat_times)
-            axes[4].plot(energy_beat_times[1:], intervals, 'bo-', markersize=3, linewidth=1, label='Beat Intervals')
-            
-            # Mark downbeats on interval plot
+            axes[4].plot(energy_beat_times[1:], intervals, 'bo-', markersize=5, linewidth=1.2, label='Beat Intervals')
             if len(downbeat_times) > 0:
                 downbeat_intervals = []
                 downbeat_times_plot = []
@@ -747,27 +731,30 @@ class BeatDetector:
                     if energy_beat_times[i-1] in downbeat_times:
                         downbeat_intervals.append(intervals[i-1])
                         downbeat_times_plot.append(beat_time)
-                
                 if downbeat_intervals:
                     axes[4].scatter(downbeat_times_plot, downbeat_intervals, 
-                                   color='darkred', s=50, label='Downbeat Intervals')
-            
-            axes[4].axhline(y=np.mean(intervals), color='r', linestyle='--', 
-                           label=f'Avg: {np.mean(intervals):.3f}s')
-            axes[4].set_title('Beat Intervals (Circles=Downbeats)')
-            axes[4].set_xlabel('Time (s)')
-            axes[4].set_ylabel('Interval (s)')
-            axes[4].legend()
+                                    color='#B71C1C', s=80, label='Downbeat Intervals')
+            axes[4].axhline(y=np.mean(intervals), color='#D32F2F', linestyle='--', 
+                            label=f'Avg: {np.mean(intervals):.3f}s')
+            axes[4].set_title('Beat Intervals (Downbeats Highlighted)', fontsize=14, fontweight='bold')
+            axes[4].set_xlabel('Time (s)', fontsize=12)
+            axes[4].set_ylabel('Interval (s)', fontsize=12)
+            axes[4].legend(fontsize=11)
             axes[4].grid(True, alpha=0.3)
         else:
             axes[4].text(0.5, 0.5, 'Insufficient beats for interval analysis', 
-                        ha='center', va='center', transform=axes[4].transAxes)
-            axes[4].set_title('Beat Intervals')
-            axes[4].set_xlabel('Time (s)')
-            axes[4].set_ylabel('Interval (s)')
-        
-        plt.tight_layout()
-        plt.show()
+                         ha='center', va='center', transform=axes[4].transAxes, fontsize=12)
+            axes[4].set_title('Beat Intervals', fontsize=14, fontweight='bold')
+            axes[4].set_xlabel('Time (s)', fontsize=12)
+            axes[4].set_ylabel('Interval (s)', fontsize=12)
+
+        # Improve tick label size for all axes
+        for ax in axes:
+            ax.tick_params(axis='both', labelsize=11)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.97])
+        # Do NOT call plt.show() here!
+        return fig
 
     def debug_beat_intervals(self, beat_times, filename):
         """Debug method to analyze beat intervals"""
