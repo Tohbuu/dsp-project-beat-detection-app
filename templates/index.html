@@ -1,86 +1,469 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DSP Beat Detection</title>
+    <title>🎵 DSP Beat Detection Web App</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .upload-area { border: 2px dashed #ccc; padding: 40px; text-align: center; margin: 20px 0; }
-        .results { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 5px; }
-        .beat { color: #e74c3c; font-weight: bold; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 20px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .file-input-label:hover {
+            transform: translateY(-2px);
+        }
+        
+        #fileName {
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.95em;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            border-color: #999;
+        }
+        
+        .demo-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .demo-btn {
+            padding: 15px 20px;
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .demo-btn:hover {
+            background: #e0e0e0;
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #results {
+            display: none;
+            background: #f8f9ff;
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.05em;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .result-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .error {
+            background: #fee;
+            border-left: 5px solid #e74c3c;
+            color: #c0392b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .success {
+            background: #efe;
+            border-left: 5px solid #27ae60;
+            color: #1e8449;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .success.show {
+            display: block;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎵 DSP Beat Detection Web App</h1>
+        <div class="header">
+            <h1>🎵 DSP Beat Detection</h1>
+            <p>Analyze audio tempo and beat patterns with advanced DSP algorithms</p>
+        </div>
         
-        <div class="upload-area">
-            <h3>Upload Audio File</h3>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <input type="file" name="audio_file" accept="audio/*" required>
-                <button type="submit">Analyze Beat & Tempo</button>
-            </form>
-        </div>
-
-        <div class="demo-area">
-            <h3>Demo Files</h3>
-            <button onclick="generateDemo(120)">Generate 120 BPM Demo</button>
-            <button onclick="generateDemo(90)">Generate 90 BPM Demo</button>
-            <button onclick="generateDemo(140)">Generate 140 BPM Demo</button>
-        </div>
-
-        <div id="results" class="results" style="display: none;">
-            <h3>Analysis Results</h3>
-            <div id="resultContent"></div>
-        </div>
-
-        <div id="loading" style="display: none;">
-            <p>Analyzing audio... Please wait.</p>
+        <div class="content">
+            <!-- Error Display -->
+            <div id="errorDiv" class="error"></div>
+            <div id="successDiv" class="success"></div>
+            
+            <!-- Upload Section -->
+            <div class="section">
+                <h2>📁 Upload Your Audio</h2>
+                <div class="upload-area" id="uploadArea">
+                    <p style="margin-bottom: 20px; color: #666;">Drag and drop your audio file here or click to browse</p>
+                    <label class="file-input-label">
+                        <span>Choose File</span>
+                        <input type="file" id="audioFile" accept="audio/*" required>
+                    </label>
+                    <div id="fileName"></div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-primary" id="analyzeBtn" onclick="analyzeAudio()" disabled>
+                        🔍 Analyze Audio
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Demo Section -->
+            <div class="section">
+                <h2>🎼 Generate Demo Files</h2>
+                <p style="margin-bottom: 20px; color: #666;">Generate sample audio files at different tempos for testing</p>
+                <div class="demo-area">
+                    <button class="demo-btn" onclick="generateDemo(90)">90 BPM Demo</button>
+                    <button class="demo-btn" onclick="generateDemo(120)">120 BPM Demo</button>
+                    <button class="demo-btn" onclick="generateDemo(140)">140 BPM Demo</button>
+                </div>
+            </div>
+            
+            <!-- Loading Section -->
+            <div id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing audio... Please wait.</p>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="results">
+                <h3>📊 Analysis Results</h3>
+                <div id="resultContent"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+        const uploadArea = document.getElementById('uploadArea');
+        const audioFile = document.getElementById('audioFile');
+        const fileName = document.getElementById('fileName');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        // File input handling
+        audioFile.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileName.textContent = `✅ Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                analyzeBtn.disabled = false;
+                document.getElementById('errorDiv').classList.remove('show');
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
             
-            const formData = new FormData(this);
+            if (e.dataTransfer.files.length > 0) {
+                audioFile.files = e.dataTransfer.files;
+                const file = e.dataTransfer.files[0];
+                fileName.textContent = `✅ Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        async function analyzeAudio() {
+            const file = audioFile.files[0];
+            if (!file) {
+                showError('Please select an audio file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('audio_file', file);
+
             const resultsDiv = document.getElementById('results');
             const loadingDiv = document.getElementById('loading');
             const resultContent = document.getElementById('resultContent');
-            
+            const errorDiv = document.getElementById('errorDiv');
+            const successDiv = document.getElementById('successDiv');
+
             loadingDiv.style.display = 'block';
             resultsDiv.style.display = 'none';
-            
+            errorDiv.classList.remove('show');
+            successDiv.classList.remove('show');
+            analyzeBtn.disabled = true;
+
             try {
                 const response = await fetch('/analyze', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     resultContent.innerHTML = `
-                        <p><span class="beat">Average Tempo: ${data.average_tempo} BPM</span></p>
-                        <p>Energy Method: ${data.tempo_energy} BPM</p>
-                        <p>Spectral Flux: ${data.tempo_flux} BPM</p>
-                        <p>Detected Beats (Energy): ${data.beat_count_energy}</p>
-                        <p>Detected Beats (Flux): ${data.beat_count_flux}</p>
-                        <p>Audio Duration: ${data.duration} seconds</p>
+                        <div class="result-item">
+                            <span class="result-label">📊 Average Tempo:</span>
+                            <span class="result-value">${data.average_tempo} BPM</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">⚡ Energy Method:</span>
+                            <span class="result-value">${data.tempo_energy} BPM</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📈 Spectral Flux:</span>
+                            <span class="result-value">${data.tempo_flux} BPM</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🥁 Energy Beats:</span>
+                            <span class="result-value">${data.beat_count_energy} beats</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📻 Flux Beats:</span>
+                            <span class="result-value">${data.beat_count_flux} beats</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">⏱️ Duration:</span>
+                            <span class="result-value">${data.duration} seconds</span>
+                        </div>
                     `;
                     resultsDiv.style.display = 'block';
+                    showSuccess('Analysis completed successfully!');
                 } else {
-                    alert('Error: ' + data.error);
+                    showError('Error: ' + (data.error || 'Unknown error occurred'));
                 }
             } catch (error) {
-                alert('Error analyzing file: ' + error);
+                showError('Error analyzing file: ' + error.message);
+                console.error(error);
+            } finally {
+                loadingDiv.style.display = 'none';
+                analyzeBtn.disabled = false;
             }
-            
-            loadingDiv.style.display = 'none';
-        });
+        }
 
         function generateDemo(tempo) {
+            showSuccess(`Generating ${tempo} BPM demo... Your download should start shortly.`);
             window.open(`/demo?tempo=${tempo}`, '_blank');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorDiv');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successDiv');
+            successDiv.textContent = '✅ ' + message;
+            successDiv.classList.add('show');
+            setTimeout(() => successDiv.classList.remove('show'), 4000);
         }
     </script>
 </body>
