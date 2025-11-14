@@ -1,4 +1,5 @@
-# 🎵 DSP Beat Detection & Tempo Estimation Project
+# 🎵 BeatPulse: A DSP-Based Music Tempo Detection System for Rhythm Analysis.
+
 ## Complete Running Guide
 
 ---
@@ -47,90 +48,117 @@ Please refer to the documents section
 
 ## ⚡ Initial Setup
 
-### Recommended quick setup (Linux / macOS)
+### Step 1: Clone/Create Project Directory
 ```bash
-# Create and activate a virtual environment
+mkdir dsp-project
+cd dsp-project
+```
+
+### Step 2: Create Virtual Environment
+```bash
 python -m venv .venv
+```
+
+### Step 3: Activate Virtual Environment
+```bash
+# Linux/Mac
 source .venv/bin/activate
 
-# Option A: Use provided helper to install dependencies
-# (runs `pip install -r requirements.txt` for you)
-bash setup.sh
+# Windows
+.venv\Scripts\activate
+```
 
-# Option B: Install directly from requirements
+### Step 4: Install Dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### Windows (PowerShell)
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+**If requirements.txt doesn't exist, install manually:**
+```bash
+pip install numpy scipy librosa matplotlib sounddevice soundfile tk
 ```
-
-Notes:
-- Requirements are listed in [requirements.txt](requirements.txt).
-- If you prefer the helper script, see [setup.sh](setup.sh).
-- If you run into audio codec issues, install ffmpeg (see Troubleshooting).
 
 ---
 
 ## 🚀 Quick Start (5-minute Demo)
 
-### 1) Verify installation
-Run the dependency and basic DSP checks:
+### Step 1: Test Installation
 ```bash
 python test_installation.py
 ```
-This uses the project's basic checks and an FFT sanity test. See [test_installation.py](test_installation.py).
+**Expected Output:**
+```
+Testing DSP project installation...
+✓ NumPy 2.3.4
+✓ SciPy 1.16.3
+✓ Librosa 0.11.0
+✓ Matplotlib 3.10.7
+✓ SoundDevice 0.5.3
+✓ SoundFile
 
-### 2) Create demo audio files
-Generate very clear demo beats (uses [`demo_signal.create_demo_beat_signal`](demo_signal.py)):
+Testing basic DSP operations...
+✓ Basic signal processing - 440Hz sine wave energy: 22049.50
+✓ FFT test - Peak frequency: 440.0 Hz
+
+🎉 All tests passed! Your DSP environment is ready.
+```
+
+### Step 2: Create Demo Files
 ```bash
 python demo_signal.py
 ```
-This produces demo files such as `demo_90bpm.wav`, `demo_120bpm.wav`, `demo_140bpm.wav` in the working directory. See [demo_signal.py](demo_signal.py) and function [`demo_signal.create_demo_beat_signal`](demo_signal.py).
+**Expected Output:**
+```
+Creating CLEAR demo beat files...
+Creating demo_120bpm.wav: 120 BPM, 30 total beats
+✓ Created: demo_120bpm.wav - 120 BPM, 15s
+Creating demo_90bpm.wav: 90 BPM, 22 total beats
+✓ Created: demo_90bpm.wav - 90 BPM, 15s
+Creating demo_140bpm.wav: 140 BPM, 35 total beats
+✓ Created: demo_140bpm.wav - 140 BPM, 15s
 
-### 3) Run command-line analysis
-Basic file analysis with the main detector (uses class [`BeatDetector`](beat_detector.py)):
+🎵 Demo files created! Test with:
+python beat_detector.py --file demo_90bpm.wav
+```
+
+### Step 3: Run Basic Analysis
 ```bash
 python beat_detector.py --file demo_120bpm.wav
 ```
-Expect output summarizing detected beats and tempo. See [beat_detector.py](beat_detector.py) and class [`BeatDetector`](beat_detector.py).
-
-### 4) Run the recommended GUI (enhanced)
-Start the enhanced GUI for an easier interactive workflow:
-```bash
-python beat_detector_gui_enhanced.py
+**Expected Output:**
 ```
-- Browse files and click "Run Basic Analysis" or "Run Enhanced Analysis".
-- The GUI uses the enhanced app in [beat_detector_gui_enhanced.py](beat_detector_gui_enhanced.py).
+=== Analyzing: demo_120bpm.wav ===
+Loading audio file: demo_120bpm.wav
+Audio loaded: 15.00 seconds, Sample rate: 22050 Hz
+Applying bandpass filter...
+  Filter range: 100-4000 Hz
+  Normalized: 0.0091-0.3628
+  ✓ Filter applied successfully
+Computing energy envelope...
+Computing spectral flux...
+Detected 29 beats with energy method
+Detected 0 beats with flux method
 
-### 5) Optional: Run the web app
-Start the Flask web interface (uploads saved to `uploads/`):
-```bash
-python web_app.py
+=== RESULTS ===
+Tempo (Energy method): 117.6 BPM
+Tempo (Spectral Flux): 0.0 BPM
+Detected 29 beats (Energy method)
+Detected 0 beats (Spectral Flux method)
+Generating visualization...
+
+Final Tempo Estimate: 117.6 BPM
 ```
-Open http://localhost:5000 in a browser. The demo generator endpoint is available at `/demo?tempo=120`. See [web_app.py](web_app.py).
 
-### 6) Optional system tests
-- Enhanced system end-to-end test: `python test_enhanced_system.py` — uses [`BeatDetector`](beat_detector.py) and demo files. See [test_enhanced_system.py](test_enhanced_system.py).
-- Improved tempo test: `python test_improved_tempo.py`. See [test_improved_tempo.py](test_improved_tempo.py).
+*A visualization window will appear with 4 graphs showing the analysis*
 
-# Quick troubleshooting pointers
-- If GUI fails, ensure Tkinter is installed (system package).
-- If audio device issues occur, verify microphone permissions or try using generated demo files (no device needed).
-- See Troubleshooting section below for common fixes.
+### Step 4: Test Other Demo Files
+```bash
+python beat_detector.py --file demo_90bpm.wav
+python beat_detector.py --file demo_140bpm.wav
+```
 
-# Files & symbols referenced
-- [requirements.txt](requirements.txt)
-- [setup.sh](setup.sh)
-- [test_installation.py](test_installation.py)
-- [demo_signal.py](demo_signal.py) — [`demo_signal.create_demo_beat_signal`](demo_signal.py)
-- [beat_detector.py](beat_detector.py) — [`BeatDetector`](beat_detector.py)
-- [beat_detector_gui_enhanced.py](beat_detector_gui_enhanced.py)
-- [web_app.py](web_app.py)
-````markdown
+---
+
 ## 📊 Detailed Running Instructions
 
 ### Option A: Enhanced GUI (Recommended for Beginners)
@@ -173,6 +201,11 @@ python test_enhanced_system.py
 **Real-time Detection:**
 ```bash
 python real_time_detector.py --simple
+```
+
+**Complete System Test:**
+```bash
+python run_complete_test.py
 ```
 
 ### Option C: Genre Analysis
@@ -379,6 +412,7 @@ dsp-project/
 ├── demo_signal.py                 # Demo file generator
 ├── test_installation.py           # Dependency checker
 ├── test_enhanced_system.py        # Enhanced features test
+├── run_complete_test.py           # Comprehensive test suite
 ├── genre_analysis.py              # Genre analysis tool
 ├── download_organizer.py          # Music directory organizer
 ├── quick_genre_test.py            # Quick genre testing
