@@ -596,32 +596,71 @@ def estimate_tempo_autocorrelation(beat_times):
 
 ### 3. Mathematical Foundations
 
-#### 3.1 Discrete Fourier Transform (DFT)
-\[ X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-j 2\pi k n / N} \]
+### 3.1 Discrete Fourier Transform (DFT)
+
+The DFT of a length‑N signal is:
+
+$$
+X[k] \;=\; \sum_{n=0}^{N-1} x[n] \, e^{-j 2\pi \frac{k n}{N}}
+$$
+
 Where:
-- \( x[n] \) = input signal
-- \( X[k] \) = frequency domain representation
-- \( N \) = number of samples
+- $x[n]$ = input signal  
+- $X[k]$ = frequency-domain representation  
+- $N$ = number of samples
 
-#### 3.2 Short-Time Energy
-\[ E[m] = \sum_{n=m}^{m+N-1} |x[n]|^2 \]
+### 3.2 Short-Time Energy
+
+Short-time (frame) energy is:
+
+$$
+E[m] \;=\; \sum_{n=m}^{m+N-1} |x[n]|^2
+$$
+
 Where:
-- \( E[m] \) = energy of m-th frame
-- \( N \) = frame size
-- \( x[n] \) = audio samples
+- $E[m]$ = energy of the $m$‑th frame  
+- $N$ = frame size  
+- $x[n]$ = audio samples
 
-#### 3.3 Spectral Flux
-\[ F[m] = \sum_{k=0}^{N/2} H(|X_m[k]| - |X_{m-1}[k]|) \]
+### 3.3 Spectral Flux
+
+Spectral flux (half-wave rectified spectral difference) is:
+
+$$
+F[m] \;=\; \sum_{k=0}^{\lfloor N/2\rfloor} H\!\bigl(|X_m[k]| - |X_{m-1}[k]|\bigr)
+$$
+
 Where:
-- \( H(x) = \max(0, x) \) (half-wave rectification)
-- \( X_m[k] \) = DFT of m-th frame
+- $H(x)=\max(0, x)$ (half‑wave rectification)  
+- $X_m[k]$ = DFT magnitude of the $m$‑th frame
 
-### 4. Performance Metrics
+## 4. Performance Metrics
 
-#### 4.1 Accuracy Metrics
-- **Tempo Accuracy**: \( \text{Accuracy} = \left(1 - \frac{|T_{detected} - T_{actual}|}{T_{actual}}\right) \times 100\% \)
-- **Beat Detection Rate**: \( \text{Precision} = \frac{TP}{TP + FP} \)
-- **Algorithm Agreement**: \( \text{Agreement} = |T_{energy} - T_{flux}| \)
+### 4.1 Accuracy Metrics
+
+Tempo accuracy (relative error → percentage):
+
+$$
+\text{Accuracy} \;=\; \left(1 - \frac{\bigl|T_{\text{detected}} - T_{\text{actual}}\bigr|}{T_{\text{actual}}}\right) \times 100\%
+$$
+
+Beat detection precision:
+
+$$
+\text{Precision} \;=\; \frac{TP}{TP + FP}
+$$
+
+Algorithm agreement (difference between methods):
+
+$$
+\text{Agreement} \;=\; \bigl|T_{\text{energy}} - T_{\text{flux}}\bigr|
+$$
+
+### 4.2 Computational Efficiency
+
+- Processing Time: Time to analyze a 3‑minute audio file  
+- Real‑time Performance: Latency in live detection  
+- Memory Usage: RAM consumption during analysis
 
 #### 4.2 Computational Efficiency
 - **Processing Time**: Time to analyze 3-minute audio file
